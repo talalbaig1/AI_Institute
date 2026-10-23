@@ -444,11 +444,18 @@ button{font-family:inherit;cursor:pointer}
           <input id="f_hp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
           <label style="display:flex; gap:12px; align-items:flex-start; font-size:14px; line-height:1.5; color:#D5E5DB; cursor:pointer">
             <input id="f_consent" type="checkbox" style="margin-top:3px; width:18px; height:18px; flex:none; accent-color:#E3B23C">
-            <span id="consentText">I agree that Talal Baig and Riaz Mohamed may store my name, email and WhatsApp number to contact me about the Build Your Agent course and its cohorts. I understand I can withdraw my consent at any time and ask for my data to be deleted.</span>
+            <span id="consentText">I agree that the Build Your Agent course team may store my name, email address and WhatsApp number and contact me about this course and its upcoming cohorts. I can withdraw my consent at any time and ask for my data to be deleted.</span>
           </label>
           <details style="font-size:13px; color:#A9BDB2; line-height:1.55">
             <summary style="cursor:pointer; color:#E3B23C">How we handle your data (PDPL)</summary>
-            <p style="margin:8px 0 0">Under the Saudi Personal Data Protection Law, we collect your name, email and WhatsApp number only to contact you about this course. The data is held in a secured database, is not sold or shared with third parties, and is visible only to the course team. We keep it until the cohort you asked about has started, or until you withdraw consent. To access, correct or delete your data, or to withdraw consent, reply STOP to any message we send you.</p>
+            <div style="margin:8px 0 0; display:flex; flex-direction:column; gap:8px">
+              <p style="margin:0"><strong style="color:#D5E5DB">What we collect:</strong> your name, email address and WhatsApp number, plus the date and wording of your consent.</p>
+              <p style="margin:0"><strong style="color:#D5E5DB">Why:</strong> only to contact you about the Build Your Agent course and its cohorts (dates, venue, fees, registration). We will not use it for anything else without asking you separately, and we do not sell or share it.</p>
+              <p style="margin:0"><strong style="color:#D5E5DB">Where it is kept:</strong> in a private spreadsheet that only the course team can open. It is hosted by Google, so your data may be processed on servers outside Saudi Arabia.</p>
+              <p style="margin:0"><strong style="color:#D5E5DB">How long:</strong> until the cohort you asked about has started, and no longer than 12 months after you register. Then we delete it.</p>
+              <p style="margin:0"><strong style="color:#D5E5DB">Your rights:</strong> you can ask to see, correct or delete your data, or withdraw your consent, at any time, and we will act within 30 days. Reply STOP to any message we send you and we will stop contacting you and delete your details.</p>
+              <p style="margin:0"><strong style="color:#D5E5DB">Age:</strong> you should be 18 or over to register.</p>
+            </div>
           </details>
           <div id="formMsg" role="status" aria-live="polite" style="font-size:14px; min-height:20px"></div>
           <button id="f_btn" type="submit" class="btn-gold" style="background:#E3B23C; color:#10241D; border:0; padding:16px 28px; border-radius:6px; font-weight:600; font-size:17px; cursor:pointer; font-family:inherit">Register my interest</button>
@@ -633,8 +640,7 @@ render();
 })();
 
 (function(){
-  var URL_='https://vkrjupjqwdeghvpjsvai.supabase.co/rest/v1/course_interest';
-  var KEY='sb_publishable_1v4D3AoNQ-1zZcWts5Im_w_skN0btli';
+  var ENDPOINT='__APPS_SCRIPT_URL__';
   var f=document.getElementById('interestForm'); if(!f) return;
   var msg=document.getElementById('formMsg'), btn=document.getElementById('f_btn');
   function say(t,ok){msg.textContent=t;msg.style.color=ok?'#9FE3B4':'#FFB4A8';}
@@ -650,9 +656,10 @@ render();
     if(!/^\+?\d{8,15}$/.test(wa)) return say('Please enter a valid WhatsApp number with country code.');
     if(!ok) return say('Please tick the consent box so we can contact you.');
     btn.disabled=true; say('Sending…',true);
-    fetch(URL_,{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify({full_name:name,email:email,whatsapp:wa,consent:true,consent_text:document.getElementById('consentText').textContent.trim(),consent_version:'2026-10-23-v1'})})
-    .then(function(r){ if(!r.ok) throw new Error(r.status); f.reset(); say('Thank you. You are on the list and we will be in touch.',true); btn.textContent='Registered'; })
+    if(ENDPOINT.indexOf('script.google.com')<0){ btn.disabled=false; return say('The sign-up form is not connected yet. Please check back soon.'); }
+    var payload=JSON.stringify({name:name,email:email,whatsapp:wa,consent:true,consentText:document.getElementById('consentText').textContent.trim(),consentVersion:'2026-10-23-v2'});
+    fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:payload})
+    .then(function(){ f.reset(); say('Thank you. You are on the list and we will be in touch.',true); btn.textContent='Registered'; })
     .catch(function(){ btn.disabled=false; say('Something went wrong. Please try again in a moment.'); });
   });
 })();
